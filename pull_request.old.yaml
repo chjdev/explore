@@ -1,0 +1,238 @@
+name: Pull request
+on:
+  pull_request:
+concurrency:
+  group: ${{ github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  passed:
+    name: CI passed
+    runs-on: ubuntu-latest
+    needs:
+      - lint
+#      - unused-deps
+      - build
+      - test
+#      - check-schema
+    steps:
+      - name: Check failure
+        env:
+          FAILED: ${{ (contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')) }}
+        run: |
+          if [ "$FAILED" = "true" ]; then
+            exit 1
+          else
+            exit 0
+          fi
+
+  build-image:
+    name: Build service image
+    if: github.repository != 'sproutfi/service-template'
+    env:
+      GCR_PREFIX: "gcr.io"
+      GCP_PROJECT: "northbound-prod"
+      IMAGE_NAME: ${{ github.event.repository.name }}
+    runs-on: ["self-hosted", "Linux", "X64"]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Login to GCR
+        uses: docker/login-action@v1
+        with:
+          registry: gcr.io
+          username: _json_key
+          password: ${{ secrets.GCP_AUTH_KEY }}
+      - uses: actions/checkout@v2
+        with:
+          ref: main
+          path: old
+      - name: Read main version
+        id: main_version
+        run: echo "::set-output name=version::$(cat ./old/.git/refs/heads/main)"
+      - name: Build service image
+        uses: docker/build-push-action@v2
+        with:
+          context: ./
+          file: ./Dockerfile.ci
+          push: false
+          build-args: |
+            CLOUDSMITH_TOKEN=${{ secrets.CLOUDSMITH_API_KEY }}
+            OLD_IMAGE=${{ env.IMAGE_NAME }}:${{ steps.main_version.outputs.version }}
+          outputs: type=docker,dest=./result
+
+  shellcheck:
+    name: Shellcheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.3.4
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@1.1.0
+
+  lint-fmt:
+    name: Lint and check formatting
+    runs-on: ["self-hosted", "Linux", "X64"]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Login to GCR
+        uses: docker/login-action@v1
+        with:
+          registry: gcr.io
+          username: _json_key
+          password: ${{ secrets.GCP_AUTH_KEY }}
+      - name: Lint and check formatting
+        uses: docker/build-push-action@v2
+        with:
+          context: ./
+          file: ./Dockerfile.ci
+          push: false
+          target: lint-fmt
+
+  lint-tests:
+    name: Lint tests
+    runs-on: ["self-hosted", "Linux", "X64"]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Login to GCR
+        uses: docker/login-action@v1
+        with:
+          registry: gcr.io
+          username: _json_key
+          password: ${{ secrets.GCP_AUTH_KEY }}
+      - name: Lint and check formatting
+        uses: docker/build-push-action@v2
+        with:
+          context: ./
+          file: ./Dockerfile.ci
+          push: false
+          target: lint-tests
+
+  unused-deps:
+    name: Check for unused Cargo dependencies
+    runs-on: ["self-hosted", "Linux", "X64"]
+    env:
+      CARGO_REGISTRIES_SPROUT_INDEX: ${{ secrets.CARGO_REGISTRIES_SPROUT_INDEX }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: cachix/cachix-action@v10
+        with:
+          name: northbound
+          authToken: "${{ secrets.CACHIX_AUTH_TOKEN }}"
+      - run: |
+          nix develop --extra-experimental-features 'nix-command flakes' ./ci/cargo-udeps -c cargo udeps --all-targets
+        shell: bash
+
+  test:
+    name: Test
+    runs-on: ["self-hosted", "Linux", "X64"]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Login to GCR
+        uses: docker/login-action@v1
+        with:
+          registry: gcr.io
+          username: _json_key
+          password: ${{ secrets.GCP_AUTH_KEY }}
+      - name: Run tests
+        uses: docker/build-push-action@v2
+        with:
+          context: ./
+          file: ./Dockerfile.ci
+          push: false
+          target: test
+          build-args: |
+            CLOUDSMITH_TOKEN=${{ secrets.CLOUDSMITH_API_KEY }}
+
+  check-graphql-schema:
+    name: Check GraphQL schema
+    runs-on: ["self-hosted", "Linux", "X64"]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Login to GCR
+        uses: docker/login-action@v1
+        with:
+          registry: gcr.io
+          username: _json_key
+          password: ${{ secrets.GCP_AUTH_KEY }}
+      - name: Check GraphQL schema
+        uses: docker/build-push-action@v2
+        with:
+          context: ./
+          file: ./Dockerfile.ci
+          push: false
+          target: graphql-schema-check
+          build-args: |
+            APOLLO_GRAPH_REF=${{ secrets.APOLLO_GRAPH_REF }}
+            APOLLO_KEY=${{ secrets.APOLLO_KEY }}
+
+  suggest-version:
+    name: Suggest VERSION
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Checkout actual branch
+        run: git checkout $GITHUB_HEAD_REF
+
+      - name: Compute next semantic release version
+        id: compute-next-version
+        run: |
+          export OUTPUT=$(unset GITHUB_ACTIONS && npx semantic-release@19.0.2 --dry-run --no-ci --branches "$GITHUB_HEAD_REF")
+          export VERSION=$(echo $OUTPUT | grep --only-matching --perl-regexp "The next release version is \K(\w+.\w+.\w+)")
+          echo "::set-output name=version::$(echo $VERSION)"
+          echo $VERSION
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Optionally Find Existing VERSION Comment to Override
+        uses: peter-evans/find-comment@v2
+        id: find-existing-comment
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: "github-actions[bot]"
+          body-includes: hooman
+
+      - name: Random Greeting
+        id: greeting
+        run: |
+          export GREETING=$(curl -s https://www.greetingsapi.com/random | jq '.greeting' | tr -d '"')
+          echo "::set-output name=greeting::$(echo $GREETING)"
+          echo $GREETING
+        shell: bash
+
+      - name: Comment expected VERSION
+        uses: peter-evans/create-or-update-comment@v2
+        with:
+          comment-id: ${{ steps.find-existing-comment.outputs.comment-id }}
+          issue-number: ${{ github.event.number }}
+          reactions: rocket
+          edit-mode: replace
+          body: |
+            ${{ steps.greeting.outputs.greeting }}, hooman of Sprout!
+
+            This pull request, once merged, will be automatically deployed to our staging cluster.
+            If you wish to deploy to production, remember to increase the version in the `./Cargo.toml` file in this pull request, and sync [Argo](https://argo-cd.northbound.app/) after merging.
+
+
+            Btw, below is the version in `./Cargo.toml` I suggest you should bump to if using [semantic-release](https://github.com/angular/angular/blob/main/CONTRIBUTING.md#-commit-message-format) commits:
+
+            ---
+
+            `${{ steps.compute-next-version.outputs.version }}`
+
+            ---
+
+            Thank you for your contribution!

@@ -1,0 +1,10 @@
+[workspace]
+members = [
+    "auth"
+]
+
+[workspace.package]
+edition = "2021"
+
+#[workspace.dependencies]
+
