@@ -45,7 +45,7 @@ jobs:
           flavor: |
             latest=false
           tags: |
-            type=sha,format=long,prefix=${{ steps.artifact_tag.outputs.tag }}-
+            type=ref,event=pr,prefix=${{ steps.artifact_tag.outputs.tag }}-pr-
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
@@ -63,6 +63,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: rust-lint
       - name: Formatting
         run: cargo fmt --all -- --check
       - name: Clippy
@@ -74,6 +76,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: rust-test
       - name: Test
         run: cargo test --workspace --all-targets --all-features --locked
 
@@ -83,6 +87,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: rust-build
       - name: Cargo Build
         run: cargo build --release --locked
       # replace with --out-dir once stable
