@@ -1,4 +1,4 @@
-FROM debian:stable-slim
+FROM ubuntu:latest
 ARG RUST_ARTIFACTS_PATH
 ARG BIN
 ENV BIN ${BIN}
