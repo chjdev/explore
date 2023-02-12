@@ -45,7 +45,7 @@ jobs:
           flavor: |
             latest=false
           tags: |
-            type=ref,event=pr,prefix=${{ steps.artifact_tag.outputs.tag }}-pr-
+            type=sha,format=long,prefix=${{ steps.artifact_tag.outputs.tag }}-
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
