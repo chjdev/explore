@@ -6,7 +6,7 @@ export const repo = new github.Repository(
     name: "explore",
     visibility: "public",
     allowRebaseMerge: true,
-    allowSquashMerge: true,
+    allowSquashMerge: false,
     allowMergeCommit: false,
     allowUpdateBranch: true,
     deleteBranchOnMerge: true,
