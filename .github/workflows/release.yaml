@@ -7,6 +7,7 @@ on:
 
 jobs:
   release-image:
+    name: Release Image
     runs-on: ubuntu-latest
     environment: production
     strategy:
@@ -31,4 +32,7 @@ jobs:
           echo source_tag=$TAG-pr-${{ steps.find_pr.outputs.pr }} >> $GITHUB_OUTPUT
           echo target_tag=$TAG >> $GITHUB_OUTPUT
       - name: Release Image
-        run: docker tag ${{ secrets.DOCKERHUB_REPO }}:${{ steps.image_tags.outputs.source_tag }} ${{ secrets.DOCKERHUB_REPO }}:${{ steps.image_tags.outputs.target_tag }}
+        run: |
+          docker pull ${{ secrets.DOCKERHUB_REPO }}:${{ steps.image_tags.outputs.source_tag }}
+          docker tag ${{ secrets.DOCKERHUB_REPO }}:${{ steps.image_tags.outputs.source_tag }} ${{ secrets.DOCKERHUB_REPO }}:${{ steps.image_tags.outputs.target_tag }}
+          docker push ${{ secrets.DOCKERHUB_REPO }}:${{ steps.image_tags.outputs.target_tag }}
