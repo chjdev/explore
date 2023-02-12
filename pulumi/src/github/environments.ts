@@ -25,3 +25,11 @@ const dockerhubToken = new github.ActionsEnvironmentSecret("dockerhubToken", {
   secretName: "DOCKERHUB_TOKEN",
   plaintextValue: dockerhubConfig.requireSecret("token"),
 });
+
+// vars seem not to be supported yet
+const dockerhubRepo = new github.ActionsEnvironmentSecret("dockerhubRepo", {
+  repository: repo.name,
+  environment: environment.environment,
+  secretName: "DOCKERHUB_REPO",
+  plaintextValue: dockerhubConfig.require("repo"),
+});

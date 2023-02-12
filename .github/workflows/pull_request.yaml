@@ -41,7 +41,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: chjdev/explore
+          images:  ${{ secrets.DOCKERHUB_TOKEN }}
           flavor: |
             latest=false
           tags: |

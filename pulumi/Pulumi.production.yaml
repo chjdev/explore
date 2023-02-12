@@ -1,4 +1,5 @@
 config:
+  dockerhub:repo: chjdev/explore
   dockerhub:token:
     secure: AAABAAsyilZV67sQAJIzJortutXhf1So26ouHuRl1YddWB42tVkPpQc//fnUgt5fy5rTBI7Eyw0XwT72beuyKUfKk6A=
   dockerhub:username:
