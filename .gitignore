@@ -1,0 +1,15 @@
+/target
+**/*.rs.bk
+/.tools
+.envrc
+.env
+**/*.log
+node_modules
+.npmrc
+
+# Intellij
+.idea
+
+# VS Code
+.history
+*.code-workspace

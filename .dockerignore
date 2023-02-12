@@ -1,0 +1,19 @@
+# Ignore everything
+**
+
+# Allow files and directories
+!/rust-artifacts
+!auth
+!Cargo.lock
+!Cargo.toml
+
+# Ignore unnecessary files inside allowed directories
+# This should go after the allowed directories
+**/*~
+**/*.log
+**/.DS_Store
+**/Thumbs.db
+
+# Prevent local secrets from leaking, if you need an env file specifically enable it
+**/*.env
+**/*.envrc

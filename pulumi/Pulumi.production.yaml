@@ -1,0 +1,11 @@
+config:
+  dockerhub:repo: chjdev/explore
+  dockerhub:token:
+    secure: AAABAAsyilZV67sQAJIzJortutXhf1So26ouHuRl1YddWB42tVkPpQc//fnUgt5fy5rTBI7Eyw0XwT72beuyKUfKk6A=
+  dockerhub:username:
+    secure: AAABADugv1IUZLK8Iifsub1CIM7yEfqFUIbk/qPwnC6r4lT+U7Q=
+  gcp:project: chjdev-explore
+  gcp:region: europe-west3
+  github:owner: chjdev
+  github:token:
+    secure: AAABAN3KTS1aeqh48oyljzIxQZrahi9QzzLpOw93v9U2eRoewYu5gZwIjS17zMDjDQlpN5m1JNxTdxKQlEQxIQxgChZsvdFJ
