@@ -34,9 +34,9 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Get bin version
-        id: version_from_toml
-        run: echo version=$(awk -F ' = ' '$1 ~ /version/ { gsub(/[\"]/, "", $2); printf("%s",$2) }' ./${{ matrix.bin }}/Cargo.toml) >> $GITHUB_OUTPUT
+      - name: Get Artifact Tag
+        id: artifact_tag
+        run: echo tag=$(cargo pkgid --locked auth | xargs basename | sed s/#/-v/) >> $GITHUB_OUTPUT
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v4
@@ -45,7 +45,7 @@ jobs:
           flavor: |
             latest=false
           tags: |
-            type=ref,event=pr,prefix=${{ matrix.bin }}-v${{ steps.version_from_toml.outputs.version }}-pr-
+            type=ref,event=pr,prefix=${{ steps.artifact_tag.outputs.tag }}-pr-
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
