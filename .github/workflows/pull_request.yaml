@@ -9,54 +9,6 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  rust-docker:
-    name: Rust Dockerize
-    runs-on: ubuntu-latest
-    environment: production
-    strategy:
-      matrix:
-        bin:
-          - auth
-    needs:
-      - rust-builder-lint
-      - rust-builder-test
-      - rust-builder-build
-    steps:
-      - uses: actions/checkout@v3
-      - name: Restore Rust Artifacts Cache
-        uses: actions/cache/restore@v3
-        with:
-          path: ${{ env.RUST_ARTIFACTS_PATH }}
-          key: rust-builder-build-${{ github.run_id }}-${{ github.run_attempt }}
-          fail-on-cache-miss: true
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Get Artifact Tag
-        id: artifact_tag
-        run: echo tag=$(cargo pkgid --locked auth | xargs basename | sed s/#/-v/) >> $GITHUB_OUTPUT
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@v4
-        with:
-          images:  ${{ secrets.DOCKERHUB_REPO }}
-          flavor: |
-            latest=false
-          tags: |
-            type=ref,event=pr,prefix=${{ steps.artifact_tag.outputs.tag }}-pr-
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          build-args: |
-            RUST_ARTIFACTS_PATH=${{ env.RUST_ARTIFACTS_PATH }}
-            BIN=${{ matrix.bin }}
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-
   rust-lint:
     name: Rust Lint
     runs-on: ubuntu-latest
