@@ -4,7 +4,7 @@ ARG BIN
 FROM ${BASE_IMAGE} as builder
 ENV BIN ${BIN}
 COPY . .
-RUN cargo install --locked --path $BIN
+RUN cargo install --locked --path "$BIN"
 
 FROM ubuntu:latest
 ENV BIN ${BIN}
