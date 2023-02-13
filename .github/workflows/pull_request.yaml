@@ -71,8 +71,7 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=chjdev/explore:rust-builder-test-buildcache
-          cache-to: type=registry,ref=chjdev/explore:rust-builder-test-buildcache,mode=max
+          cache-from: type=local,src=buildcache
 
 
   rust-builder:
@@ -105,6 +104,9 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=chjdev/explore:rust-builder-test-buildcache
-          cache-to: type=registry,ref=chjdev/explore:rust-builder-test-buildcache,mode=max
+          cache-from: |
+            type=registry,ref=chjdev/explore:rust-builder-test-buildcache
+          cache-to: |
+            type=registry,ref=chjdev/explore:rust-builder-test-buildcache,mode=max
+            type=local,src=buildcache
 
