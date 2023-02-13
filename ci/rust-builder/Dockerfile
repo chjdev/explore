@@ -7,9 +7,9 @@ COPY . .
 RUN cargo chef prepare --recipe-path recipe.json
 
 FROM chef
-# additional tools
-RUN rustup install nightly
-RUN cargo install cargo-udeps
+## additional tools
+#RUN rustup install nightly
+#RUN cargo install cargo-udeps --locked
 
 # build cache
 COPY --from=planner /app/recipe.json recipe.json
