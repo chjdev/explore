@@ -105,7 +105,6 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           outputs: |
-            type=registry
             type=docker
           cache-from: |
             type=local,src=buildcache
