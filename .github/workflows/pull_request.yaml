@@ -34,8 +34,16 @@ jobs:
     environment: production
     needs:
       - rust-builder
+    strategy:
+      matrix:
+        - auth
     steps:
       - uses: actions/checkout@v3
+      - name: Docker Build Cache
+        uses: actions/cache/restore@v3
+        with:
+          path: buildcache
+          key: buildcache
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       - name: Log in to Docker Hub
@@ -74,6 +82,11 @@ jobs:
     environment: production
     steps:
       - uses: actions/checkout@v3
+      - name: Docker Build Cache
+        uses: actions/cache@v3
+        with:
+          path: buildcache
+          key: buildcache
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       - name: Log in to Docker Hub
