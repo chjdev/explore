@@ -110,7 +110,7 @@ jobs:
         with:
           context: .
           build-args: |
-            BASE_IMAGE=rust-builder-${{ $GITHUB_SHA }}
+            BASE_IMAGE=rust-builder-${{ env.GITHUB_SHA }}
             BIN=${{ matrix.bin }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
