@@ -86,7 +86,7 @@ jobs:
     name: Rust Build
     runs-on: ubuntu-latest
     container:
-      image: ${{ secrets.DOCKERHUB_REPO }}:rust-builder-${{ $GITHUB_SHA }}
+      image: chjdev/explore:rust-builder-${{ $GITHUB_SHA }}
     needs:
       - rust-builder-cache
     steps:
