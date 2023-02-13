@@ -84,11 +84,22 @@ jobs:
   rust-build:
     name: Rust Build
     runs-on: ubuntu-latest
+    container:
+      image: lukemathwalker/cargo-chef:latest-rust-latest
+    needs:
+      - rust-cache
     steps:
       - uses: actions/checkout@v3
-      - uses: Swatinem/rust-cache@v2
+      - name: Get Cargo Version
+        id: cargo_version
+        run: echo version=$(cargo version | sed 's/ /_/g') >> $GITHUB_OUTPUT
+      - name: Rust Dependency Cache
+        uses: actions/cache/save@v3
         with:
-          shared-key: rust-build
+          path: |
+            ~/.cargo
+            ./target
+          key: rust-dependencies-${{ steps.cargo_version.outputs.version }}
       - name: Cargo Build
         run: cargo build --release --locked
       # replace with --out-dir once stable
@@ -101,3 +112,26 @@ jobs:
         with:
           path: ${{ env.RUST_ARTIFACTS_PATH }}
           key: rust-build-${{ github.run_id }}-${{ github.run_attempt }}
+
+  rust-cache:
+    name: Rust Dependency Cache
+    runs-on: ubuntu-latest
+    container:
+      image: lukemathwalker/cargo-chef:latest-rust-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Get Cargo Version
+        id: cargo_version
+        run: echo version=$(cargo version | sed 's/ /_/g') >> $GITHUB_OUTPUT
+      - name: Rust Dependency Cache
+        uses: actions/cache/save@v3
+        with:
+          path: |
+            ~/.cargo
+            ./target
+          key: rust-dependencies-${{ steps.cargo_version.outputs.version }}
+      - name: Cargo Chef Prepare
+        run: cargo chef prepare --recipe-path recipe.json
+      - name: Cargo Chef Cook
+        run: cargo chef cook --release --recipe-path recipe.json
+
