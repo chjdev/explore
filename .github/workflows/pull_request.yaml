@@ -139,7 +139,7 @@ jobs:
             latest=false
           tags: |
             type=raw,value=rust-builder-${{ steps.cargo_lock_hash.outputs.hash }}
-            type=raw,value=rust-builder-${{ $GITHUB_SHA }}
+            type=raw,value=rust-builder-${{ env.GITHUB_SHA }}
       - name: Build and Push Rust Builder
         uses: docker/build-push-action@v4
         with:
