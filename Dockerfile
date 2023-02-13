@@ -11,5 +11,5 @@ ARG BIN
 ENV BIN ${BIN}
 ENV PORT 8080
 ENV HOST 0.0.0.0
-COPY --from=builder /root/.cargo/bin /usr/local/bin
+COPY --from=builder /usr/local/cargo/$BIN /usr/local/$BIN
 CMD $BIN
