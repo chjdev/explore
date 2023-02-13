@@ -36,7 +36,8 @@ jobs:
       - rust-builder
     strategy:
       matrix:
-        - auth
+        bin:
+          - auth
     steps:
       - uses: actions/checkout@v3
       - name: Docker Build Cache
