@@ -34,7 +34,7 @@ jobs:
         run: cargo test --workspace --all-targets --all-features --locked
 
   rust-build:
-    name: Rust Build
+    name: Rust Dockerize
     runs-on: ubuntu-latest
     environment: production
     needs:
@@ -98,6 +98,7 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           context: .
+          file: ci/rust-builder/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
