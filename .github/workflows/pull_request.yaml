@@ -36,6 +36,7 @@ jobs:
   rust-build:
     name: Rust Build
     runs-on: ubuntu-latest
+    environment: production
     needs:
       - rust-builder
     steps:
@@ -72,6 +73,7 @@ jobs:
   rust-builder:
     name: Rust Builder
     runs-on: ubuntu-latest
+    environment: production
     steps:
       - uses: actions/checkout@v3
       - name: Log in to Docker Hub
