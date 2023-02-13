@@ -1,0 +1,29 @@
+name: Warmup Rust Caches
+concurrency: warmup-rust-caches
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  rust-qa:
+    name: Rust QA Cache
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: rust-qa
+      - name: Cargo Build QA
+        run: cargo build --workspace --all-targets --all-features --locked
+
+  rust-release:
+    name: Rust Release Cache
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: rust-release
+      - name: Cargo Build Release
+        run: cargo build --release --locked
