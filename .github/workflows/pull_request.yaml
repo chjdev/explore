@@ -15,9 +15,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: Swatinem/rust-builder-cache@v2
-        with:
-          shared-key: rust-builder-lint
       - name: Formatting
         run: cargo fmt --all -- --check
       - name: Clippy
@@ -28,9 +25,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: Swatinem/rust-builder-cache@v2
-        with:
-          shared-key: rust-builder-test
       - name: Test
         run: cargo test --workspace --all-targets --all-features --locked
 
@@ -108,5 +102,5 @@ jobs:
             type=registry,ref=chjdev/explore:rust-builder-test-buildcache
           cache-to: |
             type=registry,ref=chjdev/explore:rust-builder-test-buildcache,mode=max
-            type=local,src=buildcache
+            type=local,dest=buildcache
 
