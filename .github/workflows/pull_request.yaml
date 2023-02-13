@@ -67,9 +67,10 @@ jobs:
             BASE_IMAGE=${{ secrets.DOCKERHUB_REPO }}:rust-builder-test
             BIN=${{ matrix.bin }}
           push: true
-          pull: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=chjdev/explore:rust-builder-test-buildcache
+          cache-to: type=registry,ref=chjdev/explore:rust-builder-test-buildcache,mode=max
 
 
   rust-builder:
@@ -98,7 +99,8 @@ jobs:
           context: .
           file: ci/rust-builder/Dockerfile
           push: true
-          pull: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=chjdev/explore:rust-builder-test-buildcache
+          cache-to: type=registry,ref=chjdev/explore:rust-builder-test-buildcache,mode=max
 
