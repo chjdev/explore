@@ -113,6 +113,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: |
+            type=local,src=buildcache
             type=registry,ref=chjdev/explore:rust-builder-test-buildcache
           cache-to: |
             type=registry,ref=chjdev/explore:rust-builder-test-buildcache,mode=max
