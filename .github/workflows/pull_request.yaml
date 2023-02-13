@@ -94,7 +94,7 @@ jobs:
         id: cargo_version
         run: echo version=$(cargo version | sed 's/ /_/g') >> $GITHUB_OUTPUT
       - name: Rust Dependency Cache
-        uses: actions/cache/save@v3
+        uses: actions/cache/restore@v3
         with:
           path: |
             ~/.cargo
@@ -124,7 +124,7 @@ jobs:
         id: cargo_version
         run: echo version=$(cargo version | sed 's/ /_/g') >> $GITHUB_OUTPUT
       - name: Rust Dependency Cache
-        uses: actions/cache/save@v3
+        uses: actions/cache@v3
         with:
           path: |
             ~/.cargo
