@@ -7,7 +7,6 @@ concurrency:
 
 env:
   CARGO_TERM_COLOR: always
-  RUST_ARTIFACTS_PATH: ./rust-builder-artifacts
 
 jobs:
   rust-docker:
@@ -85,30 +84,49 @@ jobs:
   rust-build:
     name: Rust Build
     runs-on: ubuntu-latest
-    container:
-      image: chjdev/explore:rust-builder-${{ $GITHUB_SHA }}
     needs:
-      - rust-builder-cache
+      - rust-builder
     steps:
       - uses: actions/checkout@v3
-      - name: Cargo Build
-        run: cargo build --release --locked
-      # replace with --out-dir once stable
-      - name: Export Rust Artifacts
-        run: |
-          mkdir ${{ env.RUST_ARTIFACTS_PATH }}
-          find ./target/release -maxdepth 1 -type f -perm /111 -exec cp "{}" ${{ env.RUST_ARTIFACTS_PATH }} \;
-      - name: Save Rust Artifact Cache
-        uses: actions/cache/save@v3
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
         with:
-          path: ${{ env.RUST_ARTIFACTS_PATH }}
-          key: rust-builder-build-${{ github.run_id }}-${{ github.run_attempt }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Get Artifact Tag
+        id: artifact_tag
+        run: echo tag=$(cargo pkgid --locked auth | xargs basename | sed s/#/-v/) >> $GITHUB_OUTPUT
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images:  ${{ secrets.DOCKERHUB_REPO }}
+          flavor: |
+            latest=false
+          tags: |
+            type=ref,event=pr,prefix=${{ steps.artifact_tag.outputs.tag }}-pr-
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          build-args: |
+            BASE_IMAGE=rust-builder-${{ $GITHUB_SHA }}
+            BIN=${{ matrix.bin }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
 
   rust-builder:
     name: Rust Builder
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Get Cargo.lock Hash
         id: cargo_lock_hash
         run: echo hash=$(md5 -q Cargo.lock) >> $GITHUB_OUTPUT
