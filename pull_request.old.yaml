@@ -236,3 +236,6 @@ jobs:
             ---
 
             Thank you for your contribution!
+      - name: Get Cargo.lock Hash
+        id: cargo_lock_hash
+        run: echo hash=$(md5 -q Cargo.lock) >> $GITHUB_OUTPUT
