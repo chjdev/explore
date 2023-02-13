@@ -65,11 +65,12 @@ jobs:
   rust-lint:
     name: Rust Lint
     runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
     steps:
       - uses: actions/checkout@v3
       - uses: Swatinem/rust-cache@v2
         with:
-          shared-key: rust-qa
+          shared-key: rust-lint
       - name: Formatting
         run: cargo fmt --all -- --check
       - name: Clippy
@@ -82,9 +83,13 @@ jobs:
       - uses: actions/checkout@v3
       - uses: Swatinem/rust-cache@v2
         with:
-          shared-key: rust-qa
+          shared-key: rust-test
       - name: Test
+        if: github.event_name == 'pull_request'
         run: cargo test --workspace --all-targets --all-features --locked
+      - name: Test Dry Run
+        if: github.event_name != 'pull_request'
+        run: cargo test --workspace --all-targets --all-features --locked --no-run
 
   rust-build:
     name: Rust Build
