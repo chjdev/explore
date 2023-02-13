@@ -70,7 +70,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: Swatinem/rust-cache@v2
         with:
-          shared-key: rust-qa
+          shared-key: rust-lint
       - name: Formatting
         run: cargo fmt --all -- --check
       - name: Clippy
@@ -83,7 +83,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: Swatinem/rust-cache@v2
         with:
-          shared-key: rust-qa
+          shared-key: rust-test
       - name: Test
         if: github.event_name == 'pull_request'
         run: cargo test --workspace --all-targets --all-features --locked
