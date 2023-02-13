@@ -38,8 +38,6 @@ jobs:
     name: Rust Dockerize
     runs-on: ubuntu-latest
     environment: production
-    container:
-      image: ${{ $GITHUB_SHA }}:rust-builder-test
     needs:
       - rust-builder
     steps:
@@ -66,9 +64,10 @@ jobs:
         with:
           context: .
           build-args: |
-            BASE_IMAGE=${{ secrets.DOCKERHUB_REPO }}:rust-builder-${{ env.GITHUB_SHA }}
+            BASE_IMAGE=${{ secrets.DOCKERHUB_REPO }}:rust-builder-test
             BIN=${{ matrix.bin }}
           push: true
+          pull: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
@@ -99,6 +98,7 @@ jobs:
           context: .
           file: ci/rust-builder/Dockerfile
           push: true
+          pull: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
