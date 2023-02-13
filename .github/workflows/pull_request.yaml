@@ -39,7 +39,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     container:
-      image: ${{ env.DOCKERHUB_REPO }}:rust-builder-test
+      image: ${{ $GITHUB_SHA }}:rust-builder-test
     needs:
       - rust-builder
     steps:
