@@ -15,7 +15,7 @@ env:
 
 jobs:
   rust-docker:
-    if: ${{ github.event_name == 'pull_request' && !env.ACT }}
+    if: ${{ github.event_name == 'pull_request' }}
     name: Rust Dockerize
     runs-on: ubuntu-latest
     environment: production
