@@ -15,7 +15,7 @@ env:
 
 jobs:
   rust-docker:
-    if: github.event_name == 'pull_request'
+    if: ${{ github.event_name == 'pull_request' && !env.ACT }}
     name: Rust Dockerize
     runs-on: ubuntu-latest
     environment: production
@@ -24,8 +24,6 @@ jobs:
         bin:
           - auth
     needs:
-      - rust-lint
-      - rust-test
       - rust-build
     steps:
       - uses: actions/checkout@v3
@@ -70,6 +68,9 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           shared-key: rust-lint
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
       - name: Formatting
         run: cargo fmt --all -- --check
       - name: Clippy
@@ -83,6 +84,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           shared-key: rust-test
+      - uses: dtolnay/rust-toolchain@stable
       - name: Test
         if: github.event_name == 'pull_request'
         run: cargo test --workspace --all-targets --all-features --locked
@@ -98,6 +100,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           shared-key: rust-release
+      - uses: dtolnay/rust-toolchain@stable
       - name: Cargo Build
         run: cargo build --release --locked
       # replace with --out-dir once stable
@@ -110,3 +113,17 @@ jobs:
         with:
           path: ${{ env.RUST_ARTIFACTS_PATH }}
           key: rust-build-${{ github.run_id }}-${{ github.run_attempt }}
+
+  rust-udeps:
+    name: Rust Unused Dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: rust-udeps
+      - uses: dtolnay/rust-toolchain@nightly
+      - name: Install Cargo Udeps
+        run: cargo install cargo-udeps --locked
+      - name: Cargo Udeps
+        run: cargo +nightly udeps
