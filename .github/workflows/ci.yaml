@@ -24,6 +24,9 @@ jobs:
         bin:
           - auth
     needs:
+      - rust-udeps
+      - rust-lint
+      - rust-test
       - rust-build
     steps:
       - uses: actions/checkout@v3
@@ -65,12 +68,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: Swatinem/rust-cache@v2
-        with:
-          shared-key: rust-lint
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: rust-lint
       - name: Formatting
         run: cargo fmt --all -- --check
       - name: Clippy
@@ -81,10 +84,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
         with:
           shared-key: rust-test
-      - uses: dtolnay/rust-toolchain@stable
       - name: Test
         if: github.event_name == 'pull_request'
         run: cargo test --workspace --all-targets --all-features --locked
@@ -97,10 +100,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
         with:
           shared-key: rust-release
-      - uses: dtolnay/rust-toolchain@stable
       - name: Cargo Build
         run: cargo build --release --locked
       # replace with --out-dir once stable
@@ -119,10 +122,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@nightly
       - uses: Swatinem/rust-cache@v2
         with:
           shared-key: rust-udeps
-      - uses: dtolnay/rust-toolchain@nightly
       - name: Install Cargo Udeps
         run: cargo install cargo-udeps --locked
       - name: Cargo Udeps
