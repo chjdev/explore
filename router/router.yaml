@@ -1,0 +1,6 @@
+supergraph:
+  # The socket address and port to listen on
+  listen: "${env.HOST}:${env.PORT}"
+
+homepage:
+  enabled: false

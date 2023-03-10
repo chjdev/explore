@@ -1,4 +1,8 @@
 config:
+  apollo:graphRef:
+    secure: AAABAKtzHy2VrOMeguHi8VUgaVnMfvSUuy+1rgwr9BYm7sauv44W+4AP5NSB6gdpvCGFzpff
+  apollo:key:
+    secure: AAABAHQ+U18HYIheaZBXs1R19GB5lmH5HdrZrLWDIupdpu4HUFp1+o8l2NytLlPbMxd3YQ9xcl/gqII5Yr5u4w47DCnUtX4ajfO7yKA=
   dockerhub:repo: chjdev/explore
   dockerhub:token:
     secure: AAABAAsyilZV67sQAJIzJortutXhf1So26ouHuRl1YddWB42tVkPpQc//fnUgt5fy5rTBI7Eyw0XwT72beuyKUfKk6A=
